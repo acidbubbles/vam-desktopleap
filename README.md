@@ -9,17 +9,17 @@
 
 ## Get this template
 
-First of all, decide what your author name will be, and what your plugin name will be. From now on, replace `Author` and `MyPlugin` by your selected name. I suggest your keep those simple without any special characters.
+First of all, decide what your author name will be, and what your plugin name will be. From now on, replace `Author` and `DesktopLeap` by your selected name. I suggest your keep those simple without any special characters.
 
 - If you have a GitHub account (recommended), click on `Use this template` on the [vam-plugin-template](https://github.com/acidbubbles/vam-plugin-template). It will create your own copy. You can also [download](https://github.com/acidbubbles/vam-plugin-template/archive/master.zip) this repository.
-- Clone (or unzip) this repo under `(VaM install path)\Custom\Scripts\Author\MyPlugin`, replacing `Author` and `MyPlugin` by yours, so that the `MyPlugin.cs` is directly under the `MyPlugin` folder.
+- Clone (or unzip) this repo under `(VaM install path)\Custom\Scripts\Author\DesktopLeap`, replacing `Author` and `DesktopLeap` by yours, so that the `DesktopLeap.cs` is directly under the `DesktopLeap` folder.
 
-You should now be able to open the project in vscode by using `File`, `Open Folder` and select the `MyPlugin` folder.
+You should now be able to open the project in vscode by using `File`, `Open Folder` and select the `DesktopLeap` folder.
 
 ## Adapt the template
 
-- Rename the `MyPlugin.cs` and `MyPlugin.csproj` to match your plugin name.
-- Replace in files (<kbd>ctrl</kbd> + <kbd>shift</kbd> + <kbd>h</kbd>) all occurences of `Author` and `MyPlugin` by yours.
+- Rename the `DesktopLeap.cs` and `DesktopLeap.csproj` to match your plugin name.
+- Replace in files (<kbd>ctrl</kbd> + <kbd>shift</kbd> + <kbd>h</kbd>) all occurences of `Author` and `DesktopLeap` by yours.
 - In `meta.json`, fill in the description (keep `v0.0.0` if you plan on using GitHub Actions), credits, instructions and promotionalLink. You might also want to chage the `licenseType`, if you wish.
 - Replace the content of `README.md` by your own content.
 - Replace the author name in [LICENSE.md](LICENSE.md) file to put your own name (it's all right, you have my blessing!)
