@@ -12,6 +12,7 @@ public class DesktopLeap : MVRScript
     private readonly JSONStorableFloat _handsRotateX = new JSONStorableFloat("Rotate X", -20f, -180f, 180f) {isStorable = true};
     private readonly JSONStorableFloat _handsRotateY = new JSONStorableFloat("Rotate Y", 0f, -180f, 180f) {isStorable = true};
     private readonly JSONStorableFloat _handsRotateZ = new JSONStorableFloat("Rotate Z", 0f, -180f, 180f) {isStorable = true};
+    private GameObject _handsRig;
     private GameObject _handsContainer;
     private Transform _originalLeftHand;
     private Transform _originalRightHand;
@@ -52,16 +53,16 @@ public class DesktopLeap : MVRScript
 
     private void SyncHandsContainer(float val)
     {
-        if (_handsContainer == null) return;
-        _handsContainer.transform.localPosition = new Vector3(
+        if (_handsRig == null) return;
+        _handsRig.transform.localPosition = new Vector3(
             _handsOffsetX.val,
             _handsOffsetY.val,
             _handsOffsetZ.val
         );
         _handsContainer.transform.localEulerAngles = new Vector3(
-            _handsRotateX.val,
-            _handsRotateY.val,
-            _handsRotateZ.val
+            _handsOffsetX.val,
+            _handsOffsetY.val,
+            _handsOffsetZ.val
         );
     }
 
@@ -75,7 +76,7 @@ public class DesktopLeap : MVRScript
     {
         try
         {
-            if (SuperController.singleton.isOVR || SuperController.singleton.isOpenVR)
+            if (!SuperController.singleton.IsMonitorOnly)
             {
                 enabled = false;
                 return;
@@ -86,12 +87,15 @@ public class DesktopLeap : MVRScript
             var handModelManager = SuperController.singleton.leapHandModelControl.GetComponent<HandModelManager>();
             if (handModelManager == null) throw new NullReferenceException(nameof(handModelManager));
 
-            _handsContainer = new GameObject("DesktopLeapContainer");
-            _handsContainer.transform.SetParent(centerCamera.transform, false);
-            _handsContainer.transform.localEulerAngles = new Vector3(_handsOffsetX.val, _handsOffsetY.val, _handsOffsetZ.val);
-            _handsContainer.transform.localPosition = new Vector3(_handsRotateX.val, _handsRotateY.val, _handsRotateZ.val);
+            _handsRig = new GameObject("DesktopLeapHandsRig");
+            _handsRig.transform.SetParent(centerCamera.transform, false);
+            _handsRig.transform.localPosition = new Vector3(_handsRotateX.val, _handsRotateY.val, _handsRotateZ.val);
 
-            var provider = _handsContainer.AddComponent<LeapServiceProvider>();
+            _handsContainer = new GameObject("DesktopLeapHandsContainer");
+            _handsContainer.transform.SetParent(_handsRig.transform, false);
+            _handsContainer.transform.localEulerAngles = new Vector3(_handsOffsetX.val, _handsOffsetY.val, _handsOffsetZ.val);
+
+            var provider = _handsRig.AddComponent<LeapServiceProvider>();
             handModelManager.leapProvider = provider;
 
             _originalLeftHand = SuperController.singleton.leftHand;
@@ -118,7 +122,8 @@ public class DesktopLeap : MVRScript
         {
             var handModelManager = SuperController.singleton.leapHandModelControl.GetComponent<HandModelManager>();
             if (handModelManager != null) handModelManager.leapProvider = null;
-            DestroyImmediate(_handsContainer);
+            DestroyImmediate(_handsRig);
+            _handsRig = null;
             _handsContainer = null;
 
             Destroy(_handDisableFakeTarget);
