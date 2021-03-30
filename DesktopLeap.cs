@@ -44,6 +44,8 @@ public class DesktopLeap : MVRScript
             _handsRotateZ.setCallbackFunction = SyncHandsContainer;
             CreateSlider(_handsRotateZ, true);
             RegisterFloat(_handsRotateZ);
+
+            SyncHandsContainer(0);
         }
         catch (Exception e)
         {
@@ -60,9 +62,9 @@ public class DesktopLeap : MVRScript
             _handsOffsetZ.val
         );
         _handsContainer.transform.localEulerAngles = new Vector3(
-            _handsOffsetX.val,
-            _handsOffsetY.val,
-            _handsOffsetZ.val
+            _handsRotateX.val,
+            _handsRotateY.val,
+            _handsRotateZ.val
         );
     }
 
@@ -89,13 +91,13 @@ public class DesktopLeap : MVRScript
 
             _handsRig = new GameObject("DesktopLeapHandsRig");
             _handsRig.transform.SetParent(centerCamera.transform, false);
-            _handsRig.transform.localPosition = new Vector3(_handsRotateX.val, _handsRotateY.val, _handsRotateZ.val);
+            _handsRig.transform.localPosition = new Vector3(_handsOffsetX.val, _handsOffsetY.val, _handsOffsetZ.val);
 
             _handsContainer = new GameObject("DesktopLeapHandsContainer");
             _handsContainer.transform.SetParent(_handsRig.transform, false);
-            _handsContainer.transform.localEulerAngles = new Vector3(_handsOffsetX.val, _handsOffsetY.val, _handsOffsetZ.val);
+            _handsContainer.transform.localEulerAngles = new Vector3(_handsRotateX.val, _handsRotateY.val, _handsRotateZ.val);
 
-            var provider = _handsRig.AddComponent<LeapServiceProvider>();
+            var provider = _handsContainer.AddComponent<LeapServiceProvider>();
             handModelManager.leapProvider = provider;
 
             _originalLeftHand = SuperController.singleton.leftHand;
