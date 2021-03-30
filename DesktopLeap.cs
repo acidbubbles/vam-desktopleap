@@ -14,9 +14,13 @@ public class DesktopLeap : MVRScript
     private readonly JSONStorableFloat _handsRotateZ = new JSONStorableFloat("Rotate Z", 0f, -180f, 180f) {isStorable = true};
     private GameObject _handsRig;
     private GameObject _handsContainer;
+    private LeapServiceProvider _provider;
     private Transform _originalLeftHand;
+    private Transform _originalLeftHandParent;
     private Transform _originalRightHand;
-    private GameObject _handDisableFakeTarget;
+    private Transform _originalRightHandParent;
+    private GameObject _handDisableFakeTargetLeft;
+    private GameObject _handDisableFakeTargetRight;
 
     public override void Init()
     {
@@ -97,14 +101,19 @@ public class DesktopLeap : MVRScript
             _handsContainer.transform.SetParent(_handsRig.transform, false);
             _handsContainer.transform.localEulerAngles = new Vector3(_handsRotateX.val, _handsRotateY.val, _handsRotateZ.val);
 
-            var provider = _handsContainer.AddComponent<LeapServiceProvider>();
-            handModelManager.leapProvider = provider;
+            _provider = _handsContainer.AddComponent<LeapServiceProvider>();
+            handModelManager.leapProvider = _provider;
 
             _originalLeftHand = SuperController.singleton.leftHand;
+            _originalLeftHandParent = _originalLeftHand.parent;
             _originalRightHand = SuperController.singleton.rightHand;
-            _handDisableFakeTarget = new GameObject("DesktopLeapFakeHand");
-            SuperController.singleton.leftHand = _handDisableFakeTarget.transform;
-            SuperController.singleton.rightHand = _handDisableFakeTarget.transform;
+            _originalRightHandParent = _originalLeftHand.parent;
+            _handDisableFakeTargetLeft = new GameObject("DesktopLeapFakeLeftHand");
+            _handDisableFakeTargetLeft.transform.SetParent(_originalLeftHand, false);
+            SuperController.singleton.leftHand = _handDisableFakeTargetLeft.transform;
+            _handDisableFakeTargetRight = new GameObject("DesktopLeapFakeRightHand");
+            _handDisableFakeTargetRight.transform.SetParent(_originalRightHand, false);
+            SuperController.singleton.rightHand = _handDisableFakeTargetRight.transform;
             _originalLeftHand.gameObject.SetActive(true);
             _originalRightHand.gameObject.SetActive(true);
             _originalLeftHand.SetParent(SuperController.singleton.leapHandMountLeft, false);
@@ -123,16 +132,35 @@ public class DesktopLeap : MVRScript
         try
         {
             var handModelManager = SuperController.singleton.leapHandModelControl.GetComponent<HandModelManager>();
-            if (handModelManager != null) handModelManager.leapProvider = null;
+            if (handModelManager != null)
+            {
+                if(handModelManager.leapProvider == _provider)
+                    handModelManager.leapProvider = null;
+            }
+            _provider = null;
             DestroyImmediate(_handsRig);
             _handsRig = null;
             _handsContainer = null;
 
-            Destroy(_handDisableFakeTarget);
-            _handDisableFakeTarget = null;
+            if (_originalLeftHand != null)
+            {
+                _originalLeftHand.SetParent(_originalLeftHandParent, false);
+                SuperController.singleton.leftHand = _originalLeftHand;
+                _originalLeftHand = null;
+                _originalLeftHandParent = null;
+            }
+            Destroy(_handDisableFakeTargetLeft);
+            _handDisableFakeTargetLeft = null;
 
-            SuperController.singleton.leftHand = _originalLeftHand;
-            SuperController.singleton.rightHand = _originalRightHand;
+            if (_originalRightHand != null)
+            {
+                _originalRightHand.SetParent(_originalRightHandParent, false);
+                SuperController.singleton.rightHand = _originalRightHand;
+                _originalRightHand = null;
+                _originalRightHandParent = null;
+            }
+            Destroy(_handDisableFakeTargetRight);
+            _handDisableFakeTargetRight = null;
         }
         catch (Exception e)
         {
