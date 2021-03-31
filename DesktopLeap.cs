@@ -6,12 +6,12 @@ public class DesktopLeap : MVRScript
 {
     private readonly JSONStorableBool _leftHandDetectedJSON = new JSONStorableBool("Left hand detected", false) {isStorable = false};
     private readonly JSONStorableBool _rightHandDetectedJSON = new JSONStorableBool("Right hand detected", false) {isStorable = false};
-    private readonly JSONStorableFloat _handsOffsetX = new JSONStorableFloat("Offset X", 0f, -1f, 1f) {isStorable = true};
-    private readonly JSONStorableFloat _handsOffsetY = new JSONStorableFloat("Offset Y", -0.2f, -1f, 1f) {isStorable = true};
-    private readonly JSONStorableFloat _handsOffsetZ = new JSONStorableFloat("Offset Z", 0.5f, 0f, 2f) {isStorable = true};
-    private readonly JSONStorableFloat _handsRotateX = new JSONStorableFloat("Rotate X", -20f, -180f, 180f) {isStorable = true};
-    private readonly JSONStorableFloat _handsRotateY = new JSONStorableFloat("Rotate Y", 0f, -180f, 180f) {isStorable = true};
-    private readonly JSONStorableFloat _handsRotateZ = new JSONStorableFloat("Rotate Z", 0f, -180f, 180f) {isStorable = true};
+    private readonly JSONStorableFloat _handsOffsetX = new JSONStorableFloat("Offset X", 0f, -1f, 1f);
+    private readonly JSONStorableFloat _handsOffsetY = new JSONStorableFloat("Offset Y", -0.2f, -1f, 1f);
+    private readonly JSONStorableFloat _handsOffsetZ = new JSONStorableFloat("Offset Z", 0.5f, 0f, 2f);
+    private readonly JSONStorableFloat _handsRotateX = new JSONStorableFloat("Rotate X", -20f, -180f, 180f);
+    private readonly JSONStorableFloat _handsRotateY = new JSONStorableFloat("Rotate Y", 0f, -180f, 180f);
+    private readonly JSONStorableFloat _handsRotateZ = new JSONStorableFloat("Rotate Z", 0f, -180f, 180f);
     private GameObject _handsRig;
     private GameObject _handsContainer;
     private LeapServiceProvider _provider;
