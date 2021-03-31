@@ -92,6 +92,7 @@ public class DesktopLeap : MVRScript
     {
         _leftHandDetectedJSON.val = SuperController.singleton.leapHandLeft.gameObject.activeInHierarchy;
         _rightHandDetectedJSON.val = SuperController.singleton.leapHandRight.gameObject.activeInHierarchy;
+        UnityEngine.Internal.VR.VRTestMock.UpdateCenterEye(_handsRig.transform.position, _handsRig.transform.rotation);
     }
 
     public void OnEnable()
@@ -119,6 +120,9 @@ public class DesktopLeap : MVRScript
 
             var camera = _handsContainer.AddComponent<Camera>();
             camera.cameraType = CameraType.Game;
+
+            //This is used by LeapXRServiceProvider to calculate offsets
+            UnityEngine.Internal.VR.VRTestMock.AddTrackedDevice(UnityEngine.XR.XRNode.CenterEye);
 
             _leapProvider = _handsContainer.AddComponent<LeapXRServiceProvider>();
             _leapProvider.deviceOrigin = _handsContainer.transform;
