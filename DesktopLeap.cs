@@ -12,9 +12,12 @@ public class DesktopLeap : MVRScript
     private readonly JSONStorableFloat _handsRotateX = new JSONStorableFloat("Rotate X", -20f, -180f, 180f);
     private readonly JSONStorableFloat _handsRotateY = new JSONStorableFloat("Rotate Y", 0f, -180f, 180f);
     private readonly JSONStorableFloat _handsRotateZ = new JSONStorableFloat("Rotate Z", 0f, -180f, 180f);
+    private readonly JSONStorableFloat _deviceOffsetY = new JSONStorableFloat("Device Offset Y", 0f, -1f, 1f);
+    private readonly JSONStorableFloat _deviceOffsetZ = new JSONStorableFloat("Device Offset Z", 0.12f, 0f, 2f);
+    private readonly JSONStorableFloat _deviceTiltX = new JSONStorableFloat("Device Tilt X", 5f, -90f, 90f);
     private GameObject _handsRig;
     private GameObject _handsContainer;
-    private LeapServiceProvider _provider;
+    private LeapXRServiceProvider _leapProvider;
     private Transform _originalLeftHand;
     private Transform _originalLeftHandParent;
     private Transform _originalRightHand;
@@ -49,6 +52,16 @@ public class DesktopLeap : MVRScript
             CreateSlider(_handsRotateZ, true);
             RegisterFloat(_handsRotateZ);
 
+            _deviceOffsetY.setCallbackFunction = SyncHandsContainer;
+            CreateSlider(_deviceOffsetY, true);
+            RegisterFloat(_deviceOffsetY);
+            _deviceOffsetZ.setCallbackFunction = SyncHandsContainer;
+            CreateSlider(_deviceOffsetZ, true);
+            RegisterFloat(_deviceOffsetZ);
+            _deviceTiltX.setCallbackFunction = SyncHandsContainer;
+            CreateSlider(_deviceTiltX, true);
+            RegisterFloat(_deviceTiltX);
+
             SyncHandsContainer(0);
         }
         catch (Exception e)
@@ -70,6 +83,9 @@ public class DesktopLeap : MVRScript
             _handsRotateY.val,
             _handsRotateZ.val
         );
+        _leapProvider.deviceOffsetYAxis = _deviceOffsetY.val;
+        _leapProvider.deviceOffsetZAxis = _deviceOffsetZ.val;
+        _leapProvider.deviceTiltXAxis = _deviceTiltX.val;
     }
 
     public void Update()
@@ -101,8 +117,17 @@ public class DesktopLeap : MVRScript
             _handsContainer.transform.SetParent(_handsRig.transform, false);
             _handsContainer.transform.localEulerAngles = new Vector3(_handsRotateX.val, _handsRotateY.val, _handsRotateZ.val);
 
-            _provider = _handsContainer.AddComponent<LeapServiceProvider>();
-            handModelManager.leapProvider = _provider;
+            var camera = _handsContainer.AddComponent<Camera>();
+            camera.cameraType = CameraType.Game;
+
+            _leapProvider = _handsContainer.AddComponent<LeapXRServiceProvider>();
+            _leapProvider.deviceOrigin = _handsContainer.transform;
+            _leapProvider.deviceOffsetMode = LeapXRServiceProvider.DeviceOffsetMode.Transform;
+            _leapProvider.editTimePose = Leap.TestHandFactory.TestHandPose.DesktopModeA;
+            _leapProvider.deviceOffsetYAxis = _handsOffsetY.val;
+            _leapProvider.deviceOffsetZAxis = _handsOffsetZ.val;
+            _leapProvider.deviceTiltXAxis = _handsRotateX.val;
+            handModelManager.leapProvider = _leapProvider;
 
             _originalLeftHand = SuperController.singleton.leftHand;
             _originalLeftHandParent = _originalLeftHand.parent;
@@ -134,10 +159,10 @@ public class DesktopLeap : MVRScript
             var handModelManager = SuperController.singleton.leapHandModelControl.GetComponent<HandModelManager>();
             if (handModelManager != null)
             {
-                if(handModelManager.leapProvider == _provider)
+                if(handModelManager.leapProvider == _leapProvider)
                     handModelManager.leapProvider = null;
             }
-            _provider = null;
+            _leapProvider = null;
             DestroyImmediate(_handsRig);
             _handsRig = null;
             _handsContainer = null;
