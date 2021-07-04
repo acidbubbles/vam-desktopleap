@@ -57,7 +57,7 @@ public class DesktopLeap : MVRScript
         }
     }
 
-    private void SyncHandsContainer(float val)
+    private void SyncHandsContainer(float _)
     {
         if (_handsRig == null) return;
         _handsRig.transform.localPosition = new Vector3(
@@ -72,10 +72,18 @@ public class DesktopLeap : MVRScript
         );
     }
 
+    // private Transform last;
     public void Update()
     {
         _leftHandDetectedJSON.val = SuperController.singleton.leapHandLeft.gameObject.activeInHierarchy;
         _rightHandDetectedJSON.val = SuperController.singleton.leapHandRight.gameObject.activeInHierarchy;
+        Reattach();
+        // var current = Camera.current?.transform;
+        // if (current != last)
+        // {
+        //     SuperController.LogMessage($"{(current != null ? current.ToString() : "null")}");
+        //     last = current;
+        // }
     }
 
     public void OnEnable()
@@ -88,13 +96,8 @@ public class DesktopLeap : MVRScript
                 return;
             }
 
-            var centerCamera = SuperController.singleton.MonitorCenterCamera;
-            if (centerCamera == null) throw new NullReferenceException(nameof(centerCamera));
-            var handModelManager = SuperController.singleton.leapHandModelControl.GetComponent<HandModelManager>();
-            if (handModelManager == null) throw new NullReferenceException(nameof(handModelManager));
-
             _handsRig = new GameObject("DesktopLeapHandsRig");
-            _handsRig.transform.SetParent(centerCamera.transform, false);
+            _handsRig.SetActive(false);
             _handsRig.transform.localPosition = new Vector3(_handsOffsetX.val, _handsOffsetY.val, _handsOffsetZ.val);
 
             _handsContainer = new GameObject("DesktopLeapHandsContainer");
@@ -102,12 +105,14 @@ public class DesktopLeap : MVRScript
             _handsContainer.transform.localEulerAngles = new Vector3(_handsRotateX.val, _handsRotateY.val, _handsRotateZ.val);
 
             _provider = _handsContainer.AddComponent<LeapServiceProvider>();
+            var handModelManager = SuperController.singleton.leapHandModelControl.GetComponent<HandModelManager>();
+            if (handModelManager == null) throw new NullReferenceException(nameof(handModelManager));
             handModelManager.leapProvider = _provider;
 
             _originalLeftHand = SuperController.singleton.leftHand;
             _originalLeftHandParent = _originalLeftHand.parent;
             _originalRightHand = SuperController.singleton.rightHand;
-            _originalRightHandParent = _originalLeftHand.parent;
+            _originalRightHandParent = _originalRightHand.parent;
             _handDisableFakeTargetLeft = new GameObject("DesktopLeapFakeLeftHand");
             _handDisableFakeTargetLeft.transform.SetParent(_originalLeftHand, false);
             SuperController.singleton.leftHand = _handDisableFakeTargetLeft.transform;
@@ -119,12 +124,25 @@ public class DesktopLeap : MVRScript
             _originalLeftHand.SetParent(SuperController.singleton.leapHandMountLeft, false);
             _originalRightHand.SetParent(SuperController.singleton.leapHandMountRight, false);
 
-            SuperController.singleton.transform.parent.BroadcastMessage("DevToolsGameObjectExplorerShow", _originalLeftHand.transform.gameObject);
+            // SuperController.singleton.transform.parent.BroadcastMessage("DevToolsGameObjectExplorerShow", _originalLeftHand.transform.gameObject);
+            SuperController.singleton.transform.parent.BroadcastMessage("DevToolsGameObjectExplorerShow", SuperController.singleton.leapHandLeft.gameObject);
+
+            Reattach();
         }
         catch (Exception e)
         {
             SuperController.LogError($"{nameof(DesktopLeap)}.{nameof(OnEnable)}: {e}");
         }
+    }
+
+    private void Reattach()
+    {
+        if (_handsRig.activeInHierarchy) return;
+        var camera = Camera.main?.transform ?? SuperController.singleton.GetAtomByUid("WindowCamera").mainController.control;
+        SuperController.LogMessage("Set parent to " + camera.transform);
+        _handsRig.transform.SetParent(camera, false);
+        _handsRig.SetActive(true);
+        SyncHandsContainer(0);
     }
 
     public void OnDisable()
